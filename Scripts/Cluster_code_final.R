@@ -1,9 +1,23 @@
-library(dplyr)
-library(lubridate)
+require(dplyr)
+require(lubridate)
+require(tidvyerse)
 
-#import base data
+#REQUIRES: 
+#visit_data from Data_cleaning.R
+#full_demog_data from Data_cleaning.R
 
+#set serial interval
 time_window <- 14
+
+
+#remove participants with <5 visits FU
+count_df <- visit_data %>%
+  filter(`Event Name` %in% c("Weekly Home Visit", "6 Monthly Clinic Visit", "Initial Clinic Visit")) %>%
+  group_by(Participant_ID, `Event Name`) %>%
+  summarize(Cumulative_Count = n(), .groups = "drop") %>%
+  group_by(Participant_ID) %>%
+  summarize(Max_Count = max(Cumulative_Count), .groups = "drop")
+
 
 # Joining the count data back to the original data
 visit_data <- left_join(visit_data, count_df, by = "Participant_ID")

@@ -1,12 +1,10 @@
-library(dplyr)
-library(dplyr)
 require(lmtest)
 require(broom)
 require(tidyverse)
 require(lme4)
 
 total_single_cluster_data <- total_single_cluster_data %>%
-  left_join(full_demog_data %>% select(Participant_ID, Total_household_no, symp_cat, 
+  left_join(full_demog_data %>% select(Participant_ID, Total_household_no, age_cat,
                                        Children_5_17, Children_2_4, Children_6m_2, Children_under_6m) %>% 
               rename(Index_ID = Participant_ID), by = "Index_ID") %>% 
   mutate(inf = case_when(
@@ -17,14 +15,14 @@ total_single_cluster_data <- total_single_cluster_data %>%
   mutate(total_child = Children_5_17 + Children_2_4 + Children_6m_2 + Children_under_6m) %>%
   select(-Children_5_17, -Children_2_4, -Children_6m_2, -Children_under_6m) %>%
   mutate(total_child = as.numeric(total_child)) %>%
-  mutate(symp_cat = as.factor(symp_cat)) %>%
+  mutate(age_cat = as.factor(age_cat)) %>%
   filter(!is.na(inf)) %>%
   mutate(period = factor(period, levels=c("Pre-Delta", "Delta", "Omicron")))
 
 
 summary_single_cluster_data <- total_single_cluster_data %>% 
   group_by(cluster_ID) %>%
-  summarise(
+  summarize(
     num_participants = n(),
     num_positive = sum(ifelse(PCR_result == "Positive", 1, 0), na.rm = TRUE),
     index_id = first(Index_ID),
@@ -40,7 +38,7 @@ table(summary_single_cluster_data$num_positive)
 # Summary Table -----------------------------------------------------------
 
 
-cols_of_interest <- c("symp_cat", "period",
+cols_of_interest <- c("age_cat", "period",
                       "hh_size", "total_child", "Index_Ct", "symp")
 results_list <- list()
 
@@ -80,8 +78,8 @@ for (current_col in cols_of_interest) {
   results_list[[current_col]] <- current_results_table
 }
 
-# To view results for a specific column, for example "symp_cat", use:
-# results_list[["symp_cat"]]
+# To view results for a specific column, for example "age_cat", use:
+# results_list[["age_cat"]]
 
 
 

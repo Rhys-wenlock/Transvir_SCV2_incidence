@@ -1,8 +1,11 @@
-library(dplyr)
+require(dplyr)
 require(lmtest)
 require(broom)
 require(tidyverse)
 require(lme4)
+
+#Requires cluster_code_final.R to have been run to set up the dataset
+
 
 cluster_data_prim <- cluster_data_prim %>%
   left_join(full_demog_data %>% select(Participant_ID, Total_household_no, age_cat, 
@@ -23,7 +26,7 @@ cluster_data_prim <- cluster_data_prim %>%
 
 summary_cluster_prim_data <- cluster_data_prim %>% 
   group_by(cluster_ID) %>%
-  summarise(
+  summarize(
     num_participants = n(),
     num_positive = sum(ifelse(PCR_result == "Positive", 1, 0), na.rm = TRUE),
     index_id = first(Index_ID),

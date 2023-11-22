@@ -1,6 +1,10 @@
 require(lmtest)
 require(broom)
 require(tidyverse)
+require(stringr)
+require(stats)
+require(lme4)
+require(Matrix)
 
 # Univariate --------------------------------------------------------------
 
@@ -27,12 +31,7 @@ total_single_cluster_data <- total_single_cluster_data %>%
 cols_of_interest <- c("age_cat", "period",
                       "hh_size", "total_child")
 
-library(dplyr)
-library(stringr)
-library(stats)
-library(lme4)
-install.packages("Matrix")
-library(Matrix)
+
 # Loop over the columns of interest
 
 results_list <- list()
@@ -114,7 +113,6 @@ for (current_col in cols_of_interest) {
   results_list[[current_col]] <- current_results_table
 }
 
-library(lme4)
 
 for (current_col in cols_of_interest) {
   
@@ -292,3 +290,4 @@ results_list$total_child$p_value <- P_val
 
 # Bind all tables together into a single dataframe
 results_table <- bind_rows(results_list)
+
