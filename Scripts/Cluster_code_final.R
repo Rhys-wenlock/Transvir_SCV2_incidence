@@ -6,6 +6,8 @@ require(tidvyerse)
 #visit_data from Data_cleaning.R
 #full_demog_data from Data_cleaning.R
 
+
+
 #set serial interval
 time_window <- 14
 
