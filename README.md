@@ -8,9 +8,9 @@ Analysis for TransVIR Sars-CoV-2 Incidence Paper
 
 The directory contains:
 
-  - [:file\_folder: data](/data): The raw input data files. Stored elsewhere.
-  - [:file\_folder: scripts](/scripts): R scripts to be run in number order.
-  - [:file\_folder: output](/output): All output generated from running the scripts. Included any modified data, figures, statistical analyses.
+  - [:file\_folder: data](/Data): The raw input data files. Stored elsewhere.
+  - [:file\_folder: scripts](/Scripts): R scripts to be run in number order.
+  - [:file\_folder: output](/Output): All output generated from running the scripts. Included any modified data, figures, statistical analyses.
  
 
 ## How to replicate analysis
