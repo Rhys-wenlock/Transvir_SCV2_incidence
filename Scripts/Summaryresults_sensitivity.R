@@ -4,15 +4,15 @@
 require(tidyverse)
 
 #Import dataframes
-all_inf_data <- read_csv(here::here("Data","all_inf_data_base.csv"))
-all_inf_data1 <- read_csv(here::here("Data","all_inf_data_1.csv"))
-all_inf_data2 <- read_csv(here::here("Data","all_inf_data_2.csv"))
-all_inf_data3 <- read_csv(here::here("Data","all_inf_data_3.csv"))
-all_inf_data4 <- read_csv(here::here("Data","all_inf_data_4.csv"))
-all_inf_data5 <- read_csv(here::here("Data","all_inf_data_5.csv"))
-all_inf_data6 <- read_csv(here::here("Data","all_inf_data_6.csv"))
-all_inf_data7 <- read_csv(here::here("Data","all_inf_data_7.csv"))
-all_inf_data8 <- read_csv(here::here("Data","all_inf_data_8.csv"))
+all_inf_data <- read_csv(here::here("Output","all_inf_data_base.csv"))
+all_inf_data1 <- read_csv(here::here("Output","all_inf_data_1.csv"))
+all_inf_data2 <- read_csv(here::here("Output","all_inf_data_2.csv"))
+all_inf_data3 <- read_csv(here::here("Output","all_inf_data_3.csv"))
+all_inf_data4 <- read_csv(here::here("Output","all_inf_data_4.csv"))
+all_inf_data5 <- read_csv(here::here("Output","all_inf_data_5.csv"))
+all_inf_data6 <- read_csv(here::here("Output","all_inf_data_6.csv"))
+all_inf_data7 <- read_csv(here::here("Output","all_inf_data_7.csv"))
+all_inf_data8 <- read_csv(here::here("Output","all_inf_data_8.csv"))
 
 # Assuming you have 8 dataframes: df1, df2, ..., df8
 list_of_dataframes <- list(all_inf_data, all_inf_data1, all_inf_data2,

@@ -8,9 +8,9 @@ require(ggplot2)
 require(vcdExtra)
 
 #requires: 
-##visit_data from data_cleaning.R
-#full_demog_data from data_cleaning.R
-#all_visit_serol from data_cleaning.R
+visit_data <- read.csv(here::here("Output", "visit_data.csv"))
+full_demog_data <- read.csv(here::here("Output", "full_demog_data.csv"))
+All_visit_serol <- read.csv(here::here("Output", "All_visit_serol.csv"))
 #sample weeks function from PCR_negative_dates.R
 
 # PCR Negative Infections -------------------------------------------------

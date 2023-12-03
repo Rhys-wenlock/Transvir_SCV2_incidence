@@ -5,8 +5,8 @@ require(popEpi)
 
 #import the correct dataset - depending on sensitivity analysis to be conducted
 #default is base
-all_inf_data <- read.csv(here::here("Data", "all_inf_data_base.csv"))
-full_demog_data <- read.csv(here::here("Data", "full_demog_data.csv"))
+all_inf_data <- read.csv(here::here("Output", "all_inf_data_base.csv"))
+full_demog_data <- read.csv(here::here("Output", "full_demog_data.csv"))
 
 #Base = all_inf_data_base.csv - median SN and median N vacc
 #1 = all_inf_data1.csv - IQR1 SN and median N vaccinated
@@ -109,5 +109,5 @@ lexis_inf_split <- lexis_inf_split %>% select(lex.id,ID, calendar_time, lex.dur,
                                               household_children, crowding, hh_children, sero, period, V1_sero, V2_sero2, prior_infection, age_cat, HIV, Steroid,
                                               Cancer, Diabetes, HTN, Smoking, Employed, hh_size, vaccinated, symp)
 
-
+write.csv(lexis_inf_split, "lexis_inf_split.csv")
 

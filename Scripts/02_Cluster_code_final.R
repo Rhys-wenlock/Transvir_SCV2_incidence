@@ -3,9 +3,7 @@ require(lubridate)
 require(tidvyerse)
 
 #REQUIRES: 
-#visit_data from Data_cleaning.R
-#full_demog_data from Data_cleaning.R
-
+#run Data_cleaning.R
 
 
 #set serial interval

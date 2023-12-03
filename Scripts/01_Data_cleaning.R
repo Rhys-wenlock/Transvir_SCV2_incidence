@@ -18,7 +18,7 @@ df <- df[,-3]
 
 visit_data <- df
 visit_data$Participant_ID[visit_data$Participant_ID=="44-517H"] <- "44-517F"
-
+write.csv(visit_data, "visit_data.csv")
 
 #Demographic Data Cleaning
 
@@ -76,12 +76,12 @@ All_visit_serol <- Serol_v1 %>%
 
 colnames(All_visit_serol)[1] <- "Participant_ID"
 All_visit_serol$Participant_ID[All_visit_serol$Participant_ID=="44-517H"] <- "44-517F"
-
+write.csv(All_visit_serol, "All_visit_serol.csv")
 
 full_demog_data <- demog_data %>%
   left_join(vaccine_data, by="Participant_ID")
 
-
+write.csv(full_demog_data, "full_demog_data.csv")
 
 
 

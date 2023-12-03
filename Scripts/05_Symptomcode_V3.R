@@ -6,6 +6,7 @@ require(stringr)
 require(stats)
 require(lme4)
 #requires lexis_inf_split
+lexis_inf_split <- read.csv(here::here("Output", "lexis_inf_split.csv"))
 
 # Univariate --------------------------------------------------------------
 

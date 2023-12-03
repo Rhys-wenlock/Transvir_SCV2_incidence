@@ -6,6 +6,9 @@ require(tidyverse)
 
 #Merge visit data with full list of PCR-positive infections
 #requires all_inf_data from incidence_data base
+all_inf_data <- read.csv(here::here("Output", "all_inf_data_base.csv"))
+visit_data <- read.csv(here::here("Output", "visit_data.csv"))
+  
 #requires visit data from data_cleaning.R
 
 #Select dates of PCR-positive infections
@@ -104,7 +107,7 @@ summary_table <- data.frame(
   count = as.numeric(symptom_counts)
 )
 
-write.csv(summary_table, "Symp_summarytable.csv")df
+write.csv(summary_table, "Symp_summarytable.csv")
 
 
 

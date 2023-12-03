@@ -1,14 +1,13 @@
-require(dplyr)
 require(lmtest)
 require(broom)
 require(tidyverse)
 require(lme4)
 
-#Requires cluster_code_final.R to have been run to set up the dataset
+#Run 02_cluster_code_final before this
+#keep stored in R environment
 
-
-cluster_data_prim <- cluster_data_prim %>%
-  left_join(full_demog_data %>% select(Participant_ID, Total_household_no, age_cat, 
+total_single_cluster_data <- total_single_cluster_data %>%
+  left_join(full_demog_data %>% select(Participant_ID, Total_household_no, age_cat,
                                        Children_5_17, Children_2_4, Children_6m_2, Children_under_6m) %>% 
               rename(Index_ID = Participant_ID), by = "Index_ID") %>% 
   mutate(inf = case_when(
@@ -19,12 +18,12 @@ cluster_data_prim <- cluster_data_prim %>%
   mutate(total_child = Children_5_17 + Children_2_4 + Children_6m_2 + Children_under_6m) %>%
   select(-Children_5_17, -Children_2_4, -Children_6m_2, -Children_under_6m) %>%
   mutate(total_child = as.numeric(total_child)) %>%
-  mutate(symp = as.factor(symp)) %>%
+  mutate(age_cat = as.factor(age_cat)) %>%
   filter(!is.na(inf)) %>%
   mutate(period = factor(period, levels=c("Pre-Delta", "Delta", "Omicron")))
 
 
-summary_cluster_prim_data <- cluster_data_prim %>% 
+summary_single_cluster_data <- total_single_cluster_data %>% 
   group_by(cluster_ID) %>%
   summarize(
     num_participants = n(),
@@ -34,11 +33,10 @@ summary_cluster_prim_data <- cluster_data_prim %>%
     symp = first(symp)
   )
 
-sum(summary_cluster_prim_data$num_participants)
-sum(summary_cluster_prim_data$num_positive)
-summary(summary_cluster_prim_data$num_participants)
-summary(summary_cluster_prim_data$num_positive)
-table(summary_cluster_prim_data$num_positive)
+sum(summary_single_cluster_data$num_participants)
+summary(summary_single_cluster_data$num_participants)
+sum(summary_single_cluster_data$num_positive)
+table(summary_single_cluster_data$num_positive)
 
 # Summary Table -----------------------------------------------------------
 
@@ -49,9 +47,9 @@ results_list <- list()
 
 for (current_col in cols_of_interest) {
   
-  if(is.numeric(cluster_data_prim[[current_col]])) { 
+  if(is.numeric(total_single_cluster_data[[current_col]])) { 
     # Continuous variable
-    current_results_table <- cluster_data_prim %>%
+    current_results_table <- total_single_cluster_data %>%
       summarize(
         variable_level = as.character(current_col),
         num_exposed = paste0(median(!!sym(current_col)), " (", quantile(!!sym(current_col), 0.25), "-", quantile(!!sym(current_col), 0.75), ")"),
@@ -63,7 +61,7 @@ for (current_col in cols_of_interest) {
       )
   } else {
     # Categorical variable
-    current_results_table <- cluster_data_prim %>%
+    current_results_table <- total_single_cluster_data %>%
       group_by(!!sym(current_col)) %>%
       summarize(
         num_exposed = as.character(n()),
@@ -83,16 +81,16 @@ for (current_col in cols_of_interest) {
   results_list[[current_col]] <- current_results_table
 }
 
-# To view results for a specific column, for example "symp_cat", use:
-# results_list[["symp_cat"]]
+# To view results for a specific column, for example "age_cat", use:
+# results_list[["age_cat"]]
 
 
 
-null_model <- glmer(inf ~1 + (1|Household_ID), family=binomial(), cluster_data_prim)
+null_model <- glmer(inf ~1 + (1|Household_ID), family=binomial(), total_single_cluster_data)
 
 # Univariate age ----------------------------------------------------------
 #age_cat univariate
-age_model <- glmer(inf ~ age_cat + (1|Household_ID), family=binomial(), cluster_data_prim)
+age_model <- glmer(inf ~ age_cat + (1|Household_ID), family=binomial(), total_single_cluster_data)
 age_fef <- exp(fixef(age_model))
 age_cint <- exp(confint(age_model))
 
@@ -110,7 +108,7 @@ results_list$age_cat$p_value <- p_val$`Pr(>Chisq)`[2]
 
 
 # Univariate Period -------------------------------------------------------
-period_model <- glmer(inf ~ period + (1|Household_ID), family=binomial(), cluster_data_prim)
+period_model <- glmer(inf ~ period + (1|Household_ID), family=binomial(), total_single_cluster_data)
 period_fef <- exp(fixef(period_model))
 period_cint <- exp(confint(period_model))
 
@@ -124,7 +122,7 @@ results_list$period$p_value <- p_val$`Pr(>Chisq)`[2]
 
 
 # Univariate hh_size ------------------------------------------------------
-hh_size_model <- glmer(inf ~ hh_size + (1|Household_ID), family=binomial(), cluster_data_prim)
+hh_size_model <- glmer(inf ~ hh_size + (1|Household_ID), family=binomial(), total_single_cluster_data)
 hh_size_fef <- exp(fixef(hh_size_model))
 hh_size_cint <- exp(confint(hh_size_model))
 
@@ -136,7 +134,7 @@ results_list$hh_size$p_value <- p_val$`Pr(>Chisq)`[2]
 
 
 # Univariate HH Children --------------------------------------------------
-hh_child_model <- glmer(inf ~ total_child + (1|Household_ID), family=binomial(), cluster_data_prim)
+hh_child_model <- glmer(inf ~ total_child + (1|Household_ID), family=binomial(), total_single_cluster_data)
 hh_child_fef <- exp(fixef(hh_child_model))
 
 se <- sqrt(diag(vcov(hh_child_model)))
@@ -157,24 +155,19 @@ results_list$total_child$p_value <- p_val$`Pr(>Chisq)`[2]
 
 # Univariate Ct -----------------------------------------------------------
 
-Ct_model <- glmer(inf ~ Index_Ct + (1|Household_ID), family=binomial(), cluster_data_prim)
+Ct_model <- glmer(inf ~ Index_Ct + (1|Household_ID), family=binomial(), total_single_cluster_data)
 Ct_fef <- exp(fixef(Ct_model))
-se <- sqrt(diag(vcov(hh_child_model)))
+Ct_cint <- exp(confint(Ct_model))
 
-Ct_cint <- data.frame(
-  Estimate = Ct_fef,
-  `2.5 %` = Ct_fef - 1.96*se,
-  `97.5 %` = Ct_fef + 1.96*se
-)
 results_list$Index_Ct$OR[1] <- 
-  paste0(round(Ct_fef[2],2), " (", round(Ct_cint[2,2],2), "-", round(Ct_cint[2,3],2), ")")
+  paste0(round(Ct_fef[2],2), " (", round(Ct_cint[3],2), "-", round(Ct_cint[6],2), ")")
 
 p_val <- lrtest(Ct_model, null_model)
 results_list$Index_Ct$p_value <- p_val$`Pr(>Chisq)`[2]
 
 
 # Univariate symptom ------------------------------------------------------
-symp_model <- glmer(inf ~ symp + (1|Household_ID), family=binomial(), cluster_data_prim)
+symp_model <- glmer(inf ~ symp + (1|Household_ID), family=binomial(), total_single_cluster_data)
 symp_fef <- exp(fixef(symp_model))
 symp_cint <- exp(confint(symp_model))
 
@@ -187,4 +180,4 @@ p_val <- lrtest(symp_model, null_model)
 results_list$symp$p_value <- p_val$`Pr(>Chisq)`[2]
 
 results_table <- bind_rows(results_list)
-write.csv(results_table, "SAR_analysis.csv")
+write.csv(results_table, "HCIR_analysis.csv")

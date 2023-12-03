@@ -6,7 +6,7 @@ require(broom)
 
 
 #import lexis_inf_split from Lexis.code.R
-
+lexis_inf_split <- read.csv(here::here("Output", "lexis_inf_split.csv"))
 
 #set infection to be binary numerical
 lexis_inf_split$infection <- ifelse(lexis_inf_split$lex.Xst==TRUE, 1,0)
@@ -458,7 +458,7 @@ df.combined <- list(results_table_age, results_table_pi, results_table_hh,
                                       "num_infections", "incidence_rate_ci", "HR","type"))) %>% 
   bind_rows()
 
-write.csv(df.combined, "df_combined.csv")
+write.csv(df.combined, "crude_AGresults.csv")
 
 
 # Adjusted Models ---------------------------------------------------------
@@ -658,7 +658,7 @@ adj_combined_results <- list(results_table_adjage, results_table_adjpinf, result
                                       "p-value (Crude)", "P-Value (Adjusted)"))) %>% 
   bind_rows()
 
-write.csv(adj_combined_results, "adj_combined_results.csv")
+write.csv(adj_combined_results, "adj_AG_combined_results.csv")
 
 
 # Stratified Results by Delta/Omicron -------------------------------------
@@ -779,5 +779,5 @@ results_table_interact_pinf <- results_table_interact_pinf[c(1:2),]
 
 results_interact_combined <- rbind(results_table_interact_age, results_table_interact_pinf)
 
-write.csv(results_interact_combined, "results_interact_combined.csv")
+write.csv(results_interact_combined, "results_AG_interact_combined.csv")
 
