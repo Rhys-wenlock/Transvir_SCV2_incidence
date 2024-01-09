@@ -6,11 +6,13 @@ Analysis for TransVIR Sars-CoV-2 Incidence Paper
 
 ## Contents
 
-The directory contains:
+The directory contains the code required to perform analyses:
 
-  - [:file\_folder: data](/Data): The raw input data files. Stored elsewhere.
   - [:file\_folder: scripts](/Scripts): R scripts to be run in number order.
-  - [:file\_folder: output](/Output): All output generated from running the scripts. Included any modified data, figures, statistical analyses.
+
+
+The raw and modified data required to replicate analyses is available upon request. 
+
  
 
 ## How to replicate analysis
