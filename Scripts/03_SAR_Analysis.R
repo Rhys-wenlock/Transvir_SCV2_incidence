@@ -3,6 +3,10 @@ require(lmtest)
 require(broom)
 require(tidyverse)
 require(lme4)
+remove.packages("Matrix")
+remove.packages("lme4")
+install.packages("lme4", type = "source")
+library(lme4)
 
 #Run 02_cluster_code_final before this
 #keep stored in R environment
@@ -31,7 +35,8 @@ summary_cluster_prim_data <- cluster_data_prim %>%
     num_positive = sum(ifelse(PCR_result == "Positive", 1, 0), na.rm = TRUE),
     index_id = first(Index_ID),
     index_ct = first(Index_Ct),
-    symp = first(symp)
+    symp = first(symp), 
+    sero = first(sero)
   )
 
 sum(summary_cluster_prim_data$num_participants)
@@ -44,7 +49,7 @@ table(summary_cluster_prim_data$num_positive)
 
 
 cols_of_interest <- c("age_cat", "period",
-                      "hh_size", "total_child", "Index_Ct", "symp")
+                      "hh_size", "total_child", "Index_Ct", "symp", "sero")
 results_list <- list()
 
 for (current_col in cols_of_interest) {
@@ -55,7 +60,7 @@ for (current_col in cols_of_interest) {
       summarize(
         variable_level = as.character(current_col),
         num_exposed = paste0(median(!!sym(current_col)), " (", quantile(!!sym(current_col), 0.25), "-", quantile(!!sym(current_col), 0.75), ")"),
-        prop_exposed = n() / 468,
+        prop_exposed = n() / 442,
         num_inf = sum(inf == 1), 
         prop_inf = (num_inf / n()) * 100, 
         OR = NA, 
@@ -67,7 +72,7 @@ for (current_col in cols_of_interest) {
       group_by(!!sym(current_col)) %>%
       summarize(
         num_exposed = as.character(n()),
-        prop_exposed = n() / 468,
+        prop_exposed = n() / 442,
         num_inf = sum(inf == 1), 
         prop_inf = (num_inf / n()) * 100, 
         OR = NA, 
@@ -186,5 +191,37 @@ results_list$symp$OR[3] <-
 p_val <- lrtest(symp_model, null_model)
 results_list$symp$p_value <- p_val$`Pr(>Chisq)`[2]
 
+
+
+# Univariate sero ---------------------------------------------------------
+sero_model <- glmer(inf ~ sero + (1|Household_ID), family=binomial(), cluster_data_prim)
+sero_fef <- exp(fixef(sero_model))
+sero_cint <- exp(confint(sero_model))
+
+results_list$sero$OR[2] <- 
+  paste0(round(sero_fef[2],2), " (", round(sero_cint[3],2), "-", round(sero_cint[6],2), ")")
+
+p_val <- lrtest(sero_model, null_model)
+results_list$sero$p_value <- p_val$`Pr(>Chisq)`[2]
+
+
+
+
+
+
+
+
 results_table <- bind_rows(results_list)
 write.csv(results_table, "SAR_analysis.csv")
+
+
+
+# Multivariate Modelling --------------------------------------------------
+adjust_model <- glmer(inf ~ sero  + sero_contact+ (1|Household_ID), family=binomial(), cluster_data_prim)
+adjust_fef <- exp(fixef(adjust_model))
+adjust_cint <- exp(confint(adjust_model))
+
+test_model <- glmer(inf ~ sero+ (1|Household_ID), family=binomial(), cluster_data_prim[!is.na(cluster_data_prim$sero_contact),])
+lrtest(adjust_model, test_model)  
+
+

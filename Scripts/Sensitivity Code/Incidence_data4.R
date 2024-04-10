@@ -345,6 +345,44 @@ all_inf_data <- all_inf_data %>%
 # Convert end_date to Date type
 all_inf_data <- all_inf_data %>% mutate(end_date = as.Date(end_date, origin="1970-01-01"))
 
+#Produce code for combined prior infection variable
+#requires infections_by_week_start from 02
+
+all_inf_data$begin_date <- as.Date("2020-03-15")
+
+sample_weeks <- function(begin_date, start_date, infections_by_week_start) {
+  sample_date <- tryCatch(
+    {
+      sampled_week <- infections_by_week_start %>%
+        filter(week >= as.Date(begin_date) & week <= as.Date(start_date)) %>%
+        mutate(prob = infections / sum(infections)) %>%
+        sample_n(1, replace = TRUE, weight = prob) %>%
+        pull(week)
+      
+      return(sampled_week)
+    },
+    error = function(e) {
+      print(paste("Error:", e$message))
+      return(NA)
+    }
+  )
+  
+  return(sample_date)
+}
+
+all_inf_data <- all_inf_data %>%
+  rowwise() %>%
+  mutate(latest_infection = case_when(
+    inf_num == 0 & is.na(First_positive_date) & is.na(second_positive_date) & is.na(third_positive_date) & V1_spike =="Pos" ~ as.Date(sample_weeks(begin_date, start_date, infections_by_week_start)),
+    inf_num == 0 ~ pmax(First_positive_date, second_positive_date, third_positive_date, na.rm=TRUE),
+    inf_num == 1 & V1_spike == "Pos" ~ as.Date(sample_weeks(begin_date, start_date, infections_by_week_start)),
+    inf_num == 1 & V1_spike == "Neg" ~ as.Date(NA), 
+    inf_num == 2 ~ First_positive_date, 
+    inf_num == 3 ~ second_positive_date, 
+    inf_num == 4 ~ third_positive_date, 
+    TRUE ~ NA
+  ))
+
 
 write.csv(all_inf_data, "all_inf_data_4.csv")
 

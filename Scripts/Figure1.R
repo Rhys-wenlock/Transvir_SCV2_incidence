@@ -110,6 +110,6 @@ Figure_1 <- ggplot(df_summary_filtered, aes(x = year_week, y = Participant_ID, f
     )
   )
 
-ggsave("figure_1.png", Figure_1, width = 10, height = 10, dpi=600)
+ggsave("figure_1.pdf", Figure_1, width = 10, height = 10, dpi=600)
 
 

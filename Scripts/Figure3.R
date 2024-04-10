@@ -68,7 +68,7 @@ figure_3a$table <- figure_3a$table +
 print(figure_3a)
 
 g_to_save <- ggsave_workaround(figure_3a)
-ggsave("figure_3a.png", g_to_save, width = 10, height = 6, dpi=600)
+ggsave("figure_3a.pdf", g_to_save, width = 10, height = 6, dpi=600)
 
 
 #Figure 3b
@@ -94,5 +94,5 @@ figure_3b <- ggsurvplot_facet(figure_3b_plot, pval = FALSE, data=lexis_inf_split
 
 print(figure_3b)
 
-ggsave("figure_3b.png", figure_3b, width = 10, height = 6, dpi=600)
+ggsave("figure_3b.pdf", figure_3b, width = 10, height = 6, dpi=600)
 

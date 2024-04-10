@@ -665,8 +665,8 @@ write.csv(adj_combined_results, "adj_AG_combined_results.csv")
 
 #Age
 
-adjust_model <- coxph(Surv(lex.dur,lex.Xst)~age_cat+prior_infection+vaccinated+hh_size+ strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
-age_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~prior_infection+vaccinated+hh_size+age_cat*strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
+adjust_model <- coxph(Surv(lex.dur,lex.Xst)~age_cat+prior_infection+vaccinated+hh_size+ period+cluster(ID,Household_ID), data = lexis_inf_split)
+age_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~prior_infection+vaccinated+hh_size+age_cat*period+cluster(ID,Household_ID), data = lexis_inf_split)
 
 
 # Calculate p-values from likelihood ratio tests
@@ -675,13 +675,13 @@ p_val_interact_age <- lrtest(adjust_model, age_interactmodel)$Pr[2]
 
 # tidy() from the broom package extracts the necessary information from the models
 lexis_inf_split$period <- factor(lexis_inf_split$period, levels=c("Delta", "Omicron"))
-age_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~prior_infection+vaccinated+hh_size+age_cat*strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
+age_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~prior_infection+vaccinated+hh_size+age_cat*period+cluster(ID,Household_ID), data = lexis_inf_split)
 
 tidy_age_model_delta <- tidy(age_interactmodel, conf.int = TRUE) %>% 
   mutate(model = "Delta", p_value = NA)
 
 lexis_inf_split$period <- factor(lexis_inf_split$period, levels=c("Omicron", "Delta"))
-age_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~prior_infection+vaccinated+hh_size+age_cat*strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
+age_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~prior_infection+vaccinated+hh_size+age_cat*period+cluster(ID,Household_ID), data = lexis_inf_split)
 
 tidy_age_model_omicron <- tidy(age_interactmodel, conf.int = TRUE) %>% 
   mutate(model = "Omicron", 
@@ -722,8 +722,8 @@ results_table_interact_age <- results_table_interact_age[c(1:3),]
 
 #Prior Infectin
 
-adjust_model <- coxph(Surv(lex.dur,lex.Xst)~age_cat+prior_infection+vaccinated+hh_size+ strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
-pinf_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~vaccinated+hh_size+age_cat+prior_infection*strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
+adjust_model <- coxph(Surv(lex.dur,lex.Xst)~age_cat+prior_infection+vaccinated+hh_size+period+cluster(ID,Household_ID), data = lexis_inf_split)
+pinf_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~vaccinated+hh_size+age_cat+prior_infection*period+cluster(ID,Household_ID), data = lexis_inf_split)
 
 
 # Calculate p-values from likelihood ratio tests
@@ -732,13 +732,13 @@ p_val_interact_pinf <- lrtest(adjust_model, pinf_interactmodel)$Pr[2]
 
 # tidy() from the broom package extracts the necessary information from the models
 lexis_inf_split$period <- factor(lexis_inf_split$period, levels=c("Delta", "Omicron"))
-pinf_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~vaccinated+hh_size+age_cat+prior_infection*strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
+pinf_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~vaccinated+hh_size+age_cat+prior_infection*period+cluster(ID,Household_ID), data = lexis_inf_split)
 
 tidy_pinf_model_delta <- tidy(pinf_interactmodel, conf.int = TRUE) %>% 
   mutate(model = "Delta", p_value = NA)
 
 lexis_inf_split$period <- factor(lexis_inf_split$period, levels=c("Omicron", "Delta"))
-pinf_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~vaccinated+hh_size+age_cat+prior_infection*strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
+pinf_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~vaccinated+hh_size+age_cat+prior_infection*period+cluster(ID,Household_ID), data = lexis_inf_split)
 
 tidy_pinf_model_omicron <- tidy(pinf_interactmodel, conf.int = TRUE) %>% 
   mutate(model = "Omicron", 
@@ -780,4 +780,130 @@ results_table_interact_pinf <- results_table_interact_pinf[c(1:2),]
 results_interact_combined <- rbind(results_table_interact_age, results_table_interact_pinf)
 
 write.csv(results_interact_combined, "results_AG_interact_combined.csv")
+
+
+# Supplementary waning analysis -------------------------------------------
+
+#Produce adjusted models
+lexis_inf_split$age_cat <- factor(lexis_inf_split$age_cat, levels=c("18-49", "<5", "5-17", ">50"))
+lexis_inf_split$hh_size <- factor(lexis_inf_split$hh_size, levels=c("[5,7)", "[7,10)", "[10,Inf)"))
+lexis_inf_split$prior_infection <- factor(lexis_inf_split$prior_infection, levels=c("0", "1", "2"))
+adjust_model <- coxph(Surv(lex.dur,lex.Xst)~age_cat+combined_variable+vaccinated+hh_size+ strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
+summary(adjust_model)
+
+
+
+#Produce null model
+#test age cat
+combinednull_model <- coxph(Surv(lex.dur,lex.Xst)~age_cat+vaccinated+hh_size+strata(period)+cluster(ID,Household_ID), data = lexis_inf_split)
+
+# Calculate p-values from likelihood ratio tests
+p_val_crude_priorinf <- lrtest(priorinf_model)$Pr[2]
+p_val_adjusted <- lrtest(adjust_model, combinednull_model)$Pr[2]
+
+# tidy() from the broom package extracts the necessary information from the models
+
+tidy_adjust_model <- tidy(adjust_model, conf.int = TRUE) %>% 
+  mutate(model = "Adjusted model",
+         p_value = p_val_adjusted)
+
+
+# Join the results from both models
+results_table_adjcomb <- tidy_adjust_model
+
+# Calculate hazard ratios and confidence intervals
+results_table_adjcomb <- results_table_adjcomb %>%
+  mutate(
+    hr = exp(estimate),
+    lower_ci = exp(conf.low),
+    upper_ci = exp(conf.high),
+    conf_int = paste0("(", round(lower_ci, 2), "-", round(upper_ci, 2), ")")
+  )
+
+results_table_adjcomb <- results_table_adjcomb[grepl("^combined_variable", results_table_adjcomb$term), ]
+
+
+# Select and rename necessary columns
+results_table_adjcomb <- results_table_adjcomb %>%
+  select(model, term, hr, lower_ci, upper_ci, conf_int, p_value) %>%
+  rename(
+    Model = model,
+    `Prior Infection` = term,
+    `Hazard Ratio` = hr,
+    `Lower 95% CI` = lower_ci,
+    `Upper 95% CI` = upper_ci,
+    `95% CI` = conf_int,
+    `p-value` = p_value
+  ) %>%
+  mutate(HR = paste0(round(`Hazard Ratio`, 2), "(", round(`Lower 95% CI`, 2), "-", round(`Upper 95% CI`, 2), ")")) %>%
+  select(`Model`, `Prior Infection`,`HR`, `p-value`) %>%
+  pivot_wider(
+    names_from = Model,
+    values_from = c(`HR`, `p-value`))
+
+
+print(results_table_adjcomb)
+
+#Interaction analysis
+
+adjust_model <- coxph(Surv(lex.dur,lex.Xst)~age_cat+combined_variable+vaccinated+hh_size+ period+cluster(ID,Household_ID), data = lexis_inf_split)
+comb_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~vaccinated+hh_size+age_cat+combined_variable*period+cluster(ID,Household_ID), data = lexis_inf_split)
+
+
+# Calculate p-values from likelihood ratio tests
+p_val_interact_comb <- lrtest(adjust_model, comb_interactmodel)$Pr[2]
+
+
+# tidy() from the broom package extracts the necessary information from the models
+lexis_inf_split$period <- factor(lexis_inf_split$period, levels=c("Delta", "Omicron"))
+comb_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~vaccinated+hh_size+age_cat+combined_variable*period+cluster(ID,Household_ID), data = lexis_inf_split)
+
+tidy_comb_model_delta <- tidy(comb_interactmodel, conf.int = TRUE) %>% 
+  mutate(model = "Delta", p_value = NA)
+
+lexis_inf_split$period <- factor(lexis_inf_split$period, levels=c("Omicron", "Delta"))
+comb_interactmodel <- coxph(Surv(lex.dur,lex.Xst)~vaccinated+hh_size+age_cat+combined_variable*period+cluster(ID,Household_ID), data = lexis_inf_split)
+
+tidy_comb_model_omicron <- tidy(comb_interactmodel, conf.int = TRUE) %>% 
+  mutate(model = "Omicron", 
+         p_value = p_val_interact_pinf)
+
+results_table_interact_comb <- rbind(tidy_comb_model_delta, tidy_comb_model_omicron)
+
+results_table_interact_comb <- results_table_interact_comb[grepl("^combined_variable", results_table_interact_comb$term), ]
+
+# Calculate hazard ratios and confidence intervals
+results_table_interact_comb <- results_table_interact_comb %>%
+  mutate(
+    hr = exp(estimate),
+    lower_ci = exp(conf.low),
+    upper_ci = exp(conf.high),
+    conf_int = paste0("(", round(lower_ci, 2), "-", round(upper_ci, 2), ")")
+  )
+
+# Select and rename necessary columns
+results_table_interact_comb <- results_table_interact_comb %>%
+  select(model, term, hr, lower_ci, upper_ci, conf_int, p_value) %>%
+  rename(
+    Model = model,
+    `Variable` = term,
+    `Hazard Ratio` = hr,
+    `Lower 95% CI` = lower_ci,
+    `Upper 95% CI` = upper_ci,
+    `95% CI` = conf_int,
+    `p-value` = p_value
+  ) %>%
+  mutate(HR = paste0(round(`Hazard Ratio`, 2), "(", round(`Lower 95% CI`, 2), "-", round(`Upper 95% CI`, 2), ")")) %>%
+  select(`Model`, `Variable`,`HR`, `p-value`) %>%
+  pivot_wider(
+    names_from = Model,
+    values_from = c(`HR`, `p-value`))
+
+results_table_interact_comb <- results_table_interact_comb[c(1:4),]
+
+supp_table_comb <- cbind(results_table_adjcomb, results_table_interact_comb)
+
+write.csv(supp_table_comb, "supp_table_comb.csv")
+
+
 

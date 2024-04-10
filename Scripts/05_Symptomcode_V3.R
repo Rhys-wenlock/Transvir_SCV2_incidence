@@ -5,7 +5,7 @@ require(matrix)
 require(stringr)
 require(stats)
 require(lme4)
-#requires lexis_inf_split
+#requires lexis_inf_split from incidence 8 (PCR-positive only)
 lexis_inf_split <- read.csv(here::here("Output", "lexis_inf_split.csv"))
 
 # Univariate --------------------------------------------------------------

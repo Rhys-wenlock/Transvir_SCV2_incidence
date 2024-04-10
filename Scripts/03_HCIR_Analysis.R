@@ -42,7 +42,7 @@ table(summary_single_cluster_data$num_positive)
 
 
 cols_of_interest <- c("age_cat", "period",
-                      "hh_size", "total_child", "Index_Ct", "symp")
+                      "hh_size", "total_child", "Index_Ct", "symp", "sero")
 results_list <- list()
 
 for (current_col in cols_of_interest) {
@@ -179,5 +179,29 @@ results_list$symp$OR[3] <-
 p_val <- lrtest(symp_model, null_model)
 results_list$symp$p_value <- p_val$`Pr(>Chisq)`[2]
 
+
+# Univariate sero ---------------------------------------------------------
+sero_model <- glmer(inf ~ sero + (1|Household_ID), family=binomial(), total_single_cluster_data)
+sero_fef <- exp(fixef(sero_model))
+sero_cint <- exp(confint(sero_model))
+
+results_list$sero$OR[2] <- 
+  paste0(round(sero_fef[2],2), " (", round(sero_cint[3],2), "-", round(sero_cint[6],2), ")")
+
+p_val <- lrtest(sero_model, null_model)
+results_list$sero$p_value <- p_val$`Pr(>Chisq)`[2]
+
 results_table <- bind_rows(results_list)
 write.csv(results_table, "HCIR_analysis.csv")
+
+
+# Multivariate Modelling --------------------------------------------------
+
+adjust_model <- glmer(inf ~ sero +sero_contact+ (1|Household_ID), family=binomial(), total_single_cluster_data)
+adjust_fef <- exp(fixef(adjust_model))
+adjust_cint <- exp(confint(adjust_model))
+
+test_model <- glmer(inf ~ sero+ (1|Household_ID), family=binomial(), total_single_cluster_data[!is.na(total_single_cluster_data$sero_contact),])
+lrtest(adjust_model, test_model)  
+  
+  

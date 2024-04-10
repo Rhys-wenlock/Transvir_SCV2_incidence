@@ -5,11 +5,11 @@ require(popEpi)
 
 #import the correct dataset - depending on sensitivity analysis to be conducted
 #default is base
-all_inf_data <- read.csv(here::here("Output", "all_inf_data_base.csv"))
+all_inf_data <- read.csv(here::here("Output", "all_inf_data.csv"))
 full_demog_data <- read.csv(here::here("Output", "full_demog_data.csv"))
 
 #Base = all_inf_data_base.csv - median SN and median N vacc
-#1 = all_inf_data1.csv - IQR1 SN and median N vaccinated
+#1 = all_inf_data_1.csv - IQR1 SN and median N vaccinated
 #2 = all_inf_data2.csv - IQR1 SN and IQR1 N vaccinated
 #3 = all_inf_data3.csv - median S and median N vaccinated
 #4 = all_inf_data4.csv - median N and median N vaccinated
@@ -21,7 +21,7 @@ full_demog_data <- read.csv(here::here("Output", "full_demog_data.csv"))
 
 
 #Produce Lexis Object 
-lexis_inf <- all_inf_data %>% select(-X) %>%
+lexis_inf <- all_inf_data %>% select(-...1) %>%
   mutate(
     timein = cal.yr(as.Date(start_date, format = "%Y-%m-%d")),
     timeout = cal.yr(as.Date(end_date, format = "%Y-%m-%d")),
@@ -37,7 +37,7 @@ lexis_inf <- all_inf_data %>% select(-X) %>%
 
 rate(lexis_inf, obs= lex.Xst, pyrs=lex.dur)
 
-
+full_demog_data <- full_demog_data[,-c(27:35)]
 
 lexis_inf_split <- lexis_inf %>%
   cutLexis(lexis_inf$V2_date, timescale = "calendar_time") %>%
@@ -107,7 +107,21 @@ lexis_inf_split <- lexis_inf_split %>% select(lex.id,ID, calendar_time, lex.dur,
                                               V1_ncp, V2_date, V2_spike, V2_ncp, V3_date, V3_spike, V3_ncp, start_date, end_date, 
                                               timein, timeout, infection, Sex, Household_ID, Total_household_no, vax_date,
                                               household_children, crowding, hh_children, sero, period, V1_sero, V2_sero2, prior_infection, age_cat, HIV, Steroid,
-                                              Cancer, Diabetes, HTN, Smoking, Employed, hh_size, vaccinated, symp)
+                                              Cancer, Diabetes, HTN, Smoking, Employed, hh_size, vaccinated, symp, latest_infection)
+
+#Final tidying
+lexis_inf_split$prior_infection[lexis_inf_split$prior_infection==3] <- 2
+lexis_inf_split$prior_infection[lexis_inf_split$prior_infection==4] <- 2
+lexis_inf_split$prior_infection <- factor(lexis_inf_split$prior_infection, levels=c("0", "1", "2"))
+lexis_inf_split$latest_infection <- cal.yr(as.Date(lexis_inf_split$latest_infection, format = "%Y-%m-%d"))
+lexis_inf_split$inf_interval <- (lexis_inf_split$calendar_time + lexis_inf_split$lex.dur) - lexis_inf_split$latest_infection
+lexis_inf_split$inf_interval_cat <- cut(lexis_inf_split$inf_interval, breaks = c(0, 0.25, Inf), labels = c("0-90","90+") )
+lexis_inf_split <- lexis_inf_split %>%
+  mutate(combined_variable = paste(prior_infection, inf_interval_cat, sep = "+"))
+
+
+#for now a quick fix to 34-399H as NO serology at baseline, one infection during follow-up
+lexis_inf_split$combined_variable[lexis_inf_split$lex.id == "34-399H"] <- "0+NA"
 
 write.csv(lexis_inf_split, "lexis_inf_split.csv")
 

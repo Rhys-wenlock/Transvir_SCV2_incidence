@@ -1198,3 +1198,61 @@ cluster_data_prim <- cluster_1_data_sing_prim %>%
   ))
 
 
+#Addition of serology data for index cases
+
+#import all_visit_serol
+
+index_serol <- All_visit_serol
+colnames(index_serol)[1] <- "Index_ID"
+
+contact_serol <- All_visit_serol
+colnames(contact_serol)[1] <- "Participant_ID"
+
+cluster_data_prim <- cluster_data_prim %>%
+  left_join(index_serol, by="Index_ID") %>%
+  mutate(sero = case_when(
+    V1_spike == "Pos" ~ "Pos",
+    Index_date < V2_date & V1_spike == "Neg" ~ "Neg",
+    Index_date > V2_date & V2_spike == "Neg" ~ "Neg", 
+    Index_date > V2_date & V2_spike =="Pos" ~ "Pos", 
+    TRUE ~ NA
+  )) %>% 
+  select(-V1_date, -V1_spike, -V1_ncp, 
+         -V2_date, -V2_spike, -V2_ncp, 
+         -V3_date, -V3_spike, -V3_ncp) %>%
+  left_join(contact_serol, by="Participant_ID") %>%
+  mutate(sero_contact = case_when(
+    V1_spike == "Pos" ~ "Pos",
+    Index_date < V2_date & V1_spike == "Neg" ~ "Neg",
+    Index_date > V2_date & V2_spike == "Neg" ~ "Neg", 
+    Index_date > V2_date & V2_spike =="Pos" ~ "Pos", 
+    TRUE ~ NA
+  )) %>% 
+  select(-V1_date, -V1_spike, -V1_ncp, 
+         -V2_date, -V2_spike, -V2_ncp, 
+         -V3_date, -V3_spike, -V3_ncp)
+
+total_single_cluster_data <- total_single_cluster_data %>%
+  left_join(index_serol, by="Index_ID") %>%
+  mutate(sero = case_when(
+    V1_spike == "Pos" ~ "Pos",
+    Index_date < V2_date & V1_spike == "Neg" ~ "Neg",
+    Index_date > V2_date & V2_spike == "Neg" ~ "Neg", 
+    Index_date > V2_date & V2_spike =="Pos" ~ "Pos", 
+    TRUE ~ NA
+  )) %>% 
+  select(-V1_date, -V1_spike, -V1_ncp, 
+         -V2_date, -V2_spike, -V2_ncp, 
+         -V3_date, -V3_spike, -V3_ncp) %>%
+  left_join(contact_serol, by="Participant_ID") %>%
+  mutate(sero_contact = case_when(
+    V1_spike == "Pos" ~ "Pos",
+    Index_date < V2_date & V1_spike == "Neg" ~ "Neg",
+    Index_date > V2_date & V2_spike == "Neg" ~ "Neg", 
+    Index_date > V2_date & V2_spike =="Pos" ~ "Pos", 
+    TRUE ~ NA
+  )) %>% 
+  select(-V1_date, -V1_spike, -V1_ncp, 
+         -V2_date, -V2_spike, -V2_ncp, 
+         -V3_date, -V3_spike, -V3_ncp)
+  

@@ -18,7 +18,7 @@ gambia_case_linelist<- expand.dft(gambia_covid_daily, freq="new_cases")
 gambia_case_linelist$date <- as.Date(gambia_case_linelist$date)
 gambia_case_linelist$location <- "Gambia"
 
-Tranvsir_curve <- all_inf_data[all_inf_data$type=="PCR_pos",3]###Consider including PCR negatives here too
+Tranvsir_curve <- as.data.frame(all_inf_data[all_inf_data$type=="PCR_pos",3])###Consider including PCR negatives here too
 Tranvsir_curve$location <- "Transvir"
 colnames(Tranvsir_curve)[1] <- "date"
 Tranvsir_curve$date <- as.Date(Tranvsir_curve$date)
@@ -101,6 +101,6 @@ ggsave_workaround <- function(g){survminer:::.build_ggsurvplot(x = g,
                                                                ncensor.plot.height = NULL)}
 
 g_to_save <- ggsave_workaround(figure_2)
-ggsave("figure_2.png", figure_2, width = 10, height = 6, dpi=600)
+ggsave("figure_2.pdf", figure_2, width = 10, height = 6, dpi=600)
 
 
